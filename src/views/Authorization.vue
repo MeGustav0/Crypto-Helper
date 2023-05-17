@@ -17,7 +17,7 @@
                 -2z"/></g>
               </svg>
             </div>
-          <div class="txt" style="color: #F0C70B">Cripto-Helper</div>
+          <div class="txt" style="color: #F0C70B">Crypto-Helper</div>
         </div>
         <span class="-ff" style="font-size: 40px;display: flex;justify-content: center; margin-bottom: 20px">Authorization</span>
         <div>

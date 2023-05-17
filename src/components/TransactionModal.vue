@@ -1,34 +1,35 @@
 <template>
   <div class="add-modal flex fl-mid">
     <div class="add-transaction flex">
+      <!-- Form for adding a transaction -->
       <div class="flex" style="justify-content: space-between;padding-bottom: 30px; font-size: 30px">
-        <label for="coin-name" >Add Transaction</label>
+        <label for="coin-name">Adding a Transaction</label>
         <button class="close-btn" @click="closeModal">✕
           <i></i>
         </button>
       </div>
-      <label for="coin-name" >Название криптовалюты:</label>
-      <input class="inForm" type="text" id="coin-name" name="coin-name" required>
+      <label for="coin-name">Название криптовалюты:</label>
+      <input class="inForm" type="text" v-model="coinName" required>
       <label for="coin-amount">Количество:</label>
       <div class="flex">
         <div class="flex" style="flex-direction: column;">
-          <input class="inForm" style="width: 80%" type="number" id="coin-amount" name="coin-amount" min="0" step="0.0001" required>
+          <input class="inForm" style="width: 80%" type="number" v-model="coinAmount" min="0" step="0.0001" required>
         </div>
-        <div  class="flex">
-          <select class="buy_sell"  id="transaction-type" name="transaction-type" required>
+        <div class="flex">
+          <select class="buy_sell" v-model="transactionType" required>
             <option value="buy">Покупка</option>
             <option value="sell">Продажа</option>
           </select>
         </div>
       </div>
       <label for="transaction-price">Цена:</label>
-      <input class="inForm" type="number" id="transaction-price" name="transaction-price" min="0" step="0.01" required>
+      <input class="inForm" type="number" v-model="transactionPrice" min="0" step="0.01" required>
       <label for="transaction-date">Дата транзакции:</label>
       <div>
-        <input class="calendar" type="date" id="transaction-date" name="transaction-date" required>
-        <input class="inForm" style="width: 50%" placeholder="Заметка">
+        <input class="calendar" type="date" v-model="transactionDate" required>
+        <input class="inForm" style="width: 51%" placeholder="Заметка" v-model="transactionNote">
       </div>
-      <button class="btn" type="submit">Добавить транзакцию</button>
+      <button :disabled="isFormIncomplete" class="btn" @click="addTransaction">Добавить транзакцию</button>
     </div>
   </div>
 </template>
@@ -37,24 +38,74 @@
 export default {
   name: "TransactionModal",
 
+  data() {
+    return {
+      coinName: '',
+      transactionType: 'buy',
+      transactionPrice: '',
+      coinAmount: '',
+      transactionDate: '',
+      transactionNote: '',
+      // transactionsSummary: {}, // Сводная информация о транзакциях
+      // transactionsDetails: {}, // Детали транзакций
+    };
+  },
+  computed: {
+    isFormIncomplete() {
+      return (
+          this.coinName === "" ||
+          this.transactionPrice === "" ||
+          this.coinAmount === "" ||
+          this.transactionDate === ""
+      );
+    },
+  },
   methods: {
+    addTransaction() {
+      const TransactionArr = {
+        coinName: this.coinName,
+        coinAmount: this.coinAmount,
+        transactionType: this.transactionType,
+        transactionPrice: this.transactionPrice,
+        transactionDate: this.transactionDate,
+        transactionNote: this.transactionNote,
+      };
+
+      this.$emit('add-transaction', TransactionArr);
+
+      // Сброс значений формы
+      this.coinName = '';
+      this.transactionType = 'buy';
+      this.transactionPrice = '';
+      this.coinAmount = '';
+      this.transactionDate = '';
+      this.transactionNote = '';
+
+    },
+    // calculateTotalAssetsForAllCoins() {
+    //   let total = 0;
+    //   for (const coinName in this.transactionsSummary) {
+    //     const summary = this.transactionsSummary[coinName];
+    //     total += summary.totalTransactionPrice * summary.totalCoinAmount;
+    //   }
+    //   this.totalAssets = total.toFixed(2);
+    // },
     closeModal() {
       this.$emit('close');
-    }
+    },
   }
-
 }
 </script>
 
-<style scoped>
+<style>
 .add-modal{
   position: fixed;
   width: 100%;
   height: 100%;
   -webkit-box-pack: center;
   -webkit-box-align: center;
-  top: 0px;
-  left: 0px;
+  top: 0;
+  left: 0;
   background: rgba(10, 30, 66, 0.4);
   z-index: 1002;
 }
@@ -83,7 +134,7 @@ export default {
   transition:all 0.15s ease-in-out;
 }
 .inForm:hover{
-  box-shadow:0 0 0 2.5px rgba(117, 123, 130, 0.28);
+  box-shadow:0 0 0 3px rgba(117, 123, 130, 0.28);
   border:2px rgba(23, 23, 23, 0.1) solid;
 }
 .buy_sell{

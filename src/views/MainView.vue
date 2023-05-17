@@ -9,15 +9,27 @@
           </div>
           <div class="txt -ff">Crypto-Helper</div>
         </div>
-        <div>
-          <button class="prof" @click="openProfMenu">
-            <img src="/img/icons/img.svg" style="width: 55px;height: 55px; fill: #fff200;" alt="">
-          </button>
-          <div class="prof_menu flex" v-show="visibleProfMenu">
-            <button class="dwn-itm flex" @click="showProfile = true">Profile</button>
-            <button class="dwn-itm flex" >FAQ</button>
-            <button class="dwn-itm flex" style="border: 0" @click="openExitMenu = true">Exit</button>
+        <div class="flex">
+          <div>
+            <button class="prof" @click="openLang">
+              <img src="/img/icons/language-svgrepo-com.svg" style="width: 35px;height: 35px;" alt="">
+            </button>
+            <div class="prof_menu flex" style="min-width: 100px!important;transform: translate3d(-52px, 0px, 0px);" v-show="visibleLang">
+              <button class="dwn-itm flex" @click="changeLanguage('ru')">RU</button>
+              <button class="dwn-itm flex" @click="changeLanguage('en')">EN</button>
+            </div>
           </div>
+          <div>
+            <button class="prof" @click="openProfMenu">
+              <img src="/img/icons/img.svg" style="width: 55px;height: 55px; fill: #fff200;" alt="">
+            </button>
+            <div class="prof_menu flex" v-show="visibleProfMenu">
+              <button class="dwn-itm flex" @click="showProfile = true">Profile</button>
+              <button class="dwn-itm flex" >FAQ</button>
+              <button class="dwn-itm flex" style="border: 0" @click="openExitMenu = true">Exit</button>
+            </div>
+          </div>
+
         </div>
       </div>
 
@@ -27,14 +39,14 @@
       <div class="butt-wall flex fl-mid">
         <div class="balance" style="font-size: 20px; font-weight: 600;">
           <div style="font-size: 15px; color: #9598a3">current balance</div>
-          <div style="font-size: 35px; color: #feffff">$43653463</div>
+          <div style="font-size: 35px; color: #feffff">{{ totalAssets }}</div>
           <div style="font-size: 15px; color: green">+ $2323 (3,34%)</div>
         </div>
-        <div>
-          <button class="btn" style="margin-right: 15px">
-            change
+        <div class="flex">
+          <button class=" fl-mid alert">
+            <img src="/img/icons/notification-copy-svgrepo-com.svg" style="width: 32px; height: 40px; fill: #feffff;" alt="">
           </button>
-          <button class="btn" @click="openTransactionModal">
+          <button class="btn fl-mid" style="height: 50px" @click="openTransactionModal">
             add transaction
           </button>
         </div>
@@ -56,15 +68,19 @@
         <div class="add-wallet flex fl-mid">+</div>
       </div>
       <div class="wallet-info flex" style="flex-direction: column">
-        <div class="flex" style="width: 100%; ">
+        <div class="flex" style="width: 100%;">
+          <div class="chart">
+
+          </div>
           <div class="distribution">
 
           </div>
-          <div class="chart">
-          </div>
         </div>
         <div class="table">
-          <p style="font-size: 35px; color: #feffff;  padding:10px; ">Assets</p>
+          <div class="flex" style="justify-content: space-between">
+            <p style="font-size: 35px; color: #feffff;  padding:10px; ">Assets</p>
+            <button style="margin: 10px" class="btn" @click="openTransactionCoinModal">Подробнее по транзакциям</button>
+          </div>
           <table class="table_main">
             <thead>
             <tr>
@@ -75,33 +91,41 @@
               <th class="fl-mid">
                 <div>24 h.</div></th>
               <th>
-                <div >Assets</div></th>
+                <div>Assets</div></th>
               <th>
                 <div >profit/loss</div></th>
               <th style="text-align: center;" class="fl-mid td-small">
                 <div>Delete coin</div></th>
             </tr>
             </thead>
-            <tbody>
-            <tr class="table-info" @click="openTransactionCoinModal">
-              <th style="padding-left: 10px">
-                <div id="Name">Bitcoin</div></th>
-              <th>
-                <div>$3234</div></th>
-              <th class="fl-mid">
-                <div>+ $3 (2%)</div></th>
-              <th>
-                <div id="assets">$43653463</div></th>
-              <th>
-                <div>profit/loss</div></th>
-              <th style="text-align: center;" class="fl-mid td-small">
-                <div>
-                  <button class="delete-coin">
-                    <img src="/img/icons/trash-1-svgrepo-com.svg" style="width: 30px; height: 40px;" alt="">
-                  </button>
-                </div>
-              </th>
-            </tr>
+            <tbody >
+              <tr  v-for="(summary, coinName) in transactionsSummary" :key="coinName" class="table-info" >
+                <!--        v-for="transaction in transactions" :key="transaction.coinName"-->
+                <th style="padding-left: 10px">
+                  <div>{{ coinName }}</div>
+                </th>
+                <th>
+                  <div>{{ summary.totalTransactionPrice }}</div>
+                </th>
+                <th class="fl-mid">
+                  <div>+ $3 (2%)</div></th>
+                <th>
+                  <div>{{ calculateTotalAssets(summary) }}</div>
+                  <div style="font-size: 12px; color: #9598a3">{{ summary.totalCoinAmount }}</div>
+                </th>
+                <th>
+                  <div>profit/loss</div></th>
+                <th class="fl-mid td-small">
+                  <div style="text-align: center;" >
+                    <button class="delete-coin" @click="removeCoin(coinName)">
+                      <img src="/img/icons/trash-1-svgrepo-com.svg" style="width: 30px; height: 40px;" alt="">
+                    </button>
+                  </div>
+                </th>
+
+              </tr>
+<!--            <AssetsTable />-->
+<!--            <TransactionCoinModal  @close="closeTransactionCoinModal" :transactions="transactions" :key="transactions.coinName" />-->
             </tbody>
           </table>
         </div>
@@ -117,42 +141,268 @@
         </div>
       </div>
     </div>
-    <div v-if="showProfile">
-      <ProfUser />
+  </div>
+
+  <div class="add-modal flex fl-mid" v-if="showTransactionModal" >
+    <div class="add-transaction flex">
+      <!-- Form for adding a transaction -->
+      <div class="flex" style="justify-content: space-between;padding-bottom: 30px; font-size: 30px">
+        <label for="coin-name">Adding a Transaction</label>
+        <button class="close-btn"  @click="closeTransactionModal">✕
+          <i></i>
+        </button>
+      </div>
+      <label for="coin-name">Название криптовалюты:</label>
+      <input class="inForm" type="text" v-model="coinName" required>
+      <label for="coin-amount">Количество:</label>
+      <div class="flex">
+        <div class="flex" style="flex-direction: column;">
+          <input class="inForm" style="width: 80%" type="number" v-model="coinAmount" min="0" step="0.0001" required>
+        </div>
+        <div class="flex">
+          <select class="buy_sell" v-model="transactionType" required>
+            <option value="buy">Покупка</option>
+            <option value="sell">Продажа</option>
+          </select>
+        </div>
+      </div>
+      <label for="transaction-price">Цена:</label>
+      <input class="inForm" type="number" v-model="transactionPrice" min="0" step="0.01" required>
+      <label for="transaction-date">Дата транзакции:</label>
+      <div>
+        <input class="calendar" type="date" v-model="transactionDate" required>
+        <input class="inForm" style="width: 51%" placeholder="Заметка" v-model="transactionNote">
+      </div>
+      <button :disabled="isFormIncomplete" class="btn" @click="addTransaction">Добавить транзакцию</button>
     </div>
   </div>
-  <TransactionModal v-if="showTransactionModal" @close="closeTransactionModal" />
-  <TransactionCoinModal v-if="showTransactionCoinModal" @close="closeTransactionCoinModal" />
+
+  <div class="transaction-modal flex fl-mid" v-if="showTransactionCoinModal" @click="closeTransactionCoinModal" >
+    <p style="font-size: 50px; color: #9598a3">Вы еще не добавили не одной транзакции...</p>
+    <div class="table-coin flex" style="z-index: 2000" v-for="(transactionList, coinName) in transactionsDetails" :key="coinName">
+      <!--    v-for="transaction in transactions" :key="transaction.coinName"-->
+      <div class="flex" style="justify-content: space-between;padding-bottom: 30px; font-size: 30px">
+        <p style="font-size: 35px; color: #feffff;  padding:10px; ">Подробная информация по транзакциям</p>
+        <button class="close-btn " @click="closeTransactionCoinModal" >✕
+          <i ></i>
+        </button>
+      </div>
+      <table style="border-collapse: collapse;">
+        <thead>
+        <tr style="border-bottom: rgba(254,255,255,0.35) solid 1px;">
+          <th style="padding-left: 10px">
+            <div>Type</div>
+          </th>
+          <th>
+            <div>Price</div>
+          </th>
+          <th class="fl-mid">
+            <div>24 h.</div>
+          </th>
+          <th>
+            <div >Assets</div>
+          </th>
+          <th>
+            <div >Notes</div>
+          </th>
+          <th style="text-align: center;" class="fl-mid td-small">
+            <div>Delete trade</div>
+          </th>
+        </tr>
+        </thead>
+        <tbody v-for="(transactionList, coinName) in transactionsDetails" :key="coinName">
+        <tr v-for="(transaction, index) in transactionList" :key="index" class="table-info">
+          <th style="padding-left: 10px">
+            <div>{{ transaction.transactionType }}</div>
+            <div>{{ coinName }}</div>
+            <div style="font-size: 14px">{{ transaction.transactionDate }}</div>
+          </th>
+          <th>
+            <div>{{ transaction.transactionPrice }}</div>
+          </th>
+          <th class="fl-mid">
+            <div>+ $3 (2%)</div>
+          </th>
+          <th>
+            <!--Здесь цена умноженная на количество-->
+            <div>{{ calculateTransactionAssets(transaction) }}</div>
+            <div>{{ transaction.coinAmount }}</div>
+          </th>
+          <th>
+            <div>{{ transaction.transactionNote }}</div>
+          </th>
+          <th style="text-align: center;" class="fl-mid td-small">
+            <div>
+              <button class="delete-coin" @click="removeTransaction(coinName, index)">
+                <img src="/img/icons/trash-1-svgrepo-com.svg" style="width: 30px; height: 40px;" alt="">
+              </button>
+            </div>
+          </th>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+<!--  <TransactionModal v-if="showTransactionModal" @close="closeTransactionModal"  @add-transaction="handleTransactionAdded" />-->
+<!--  <TransactionModal @add-transaction="addTransaction" v-if="showTransactionModal" @close="closeTransactionModal" />-->
 
 </template>
 
 <script>
+import * as all from 'vue'
+console.log(all)
 import router from "@/router";
-import TransactionModal from "@/components/TransactionModal";
-import TransactionCoinModal from "@/components/TransactionCoinModal";
+// import i18n from '@/i18n';
 // import axios from 'axios';
 
 export default {
-  components: {
-    TransactionModal,
-    TransactionCoinModal,
-  },
   data() {
     return {
+      visibleLang: false,
       visibleProfMenu: false,
       openExitMenu: false,
       showProfile: false,
+      showTable: false,
       showTransactionModal: false,
       showTransactionCoinModal: false,
-    }
+      coinName: '',
+      transactionType: 'buy',
+      transactionPrice: '',
+      coinAmount: '',
+      transactionDate: '',
+      transactionNote: '',
+      transactionsSummary: {}, // Сводная информация о транзакциях
+      transactionsDetails: {}, // Детали транзакций
+      totalAssets: 0, // Добавлено свойство для общих активов
+    };
+  },
+  computed: {
+    isFormIncomplete() {
+      return (
+          this.coinName === '' ||
+          this.transactionPrice === '' ||
+          this.coinAmount === '' ||
+          this.transactionDate === ''
+      );
+    },
   },
   methods: {
     exit() {
       router.push('/')
       localStorage.clear()
     },
+    changeLanguage(locale) {
+      this.$i18n.locale = locale;
+      localStorage.setItem('language', locale); // Сохранение выбранного языка в localStorage
+    },
+    addTransaction() {
+      // Получение данных из формы
+      const coinName = this.coinName;
+      const transactionType = this.transactionType;
+      let transactionPrice = Number(this.transactionPrice);
+      let coinAmount = Number(this.coinAmount);
+
+      // Проверка типа транзакции
+      if (transactionType === 'sell') {
+        // Если тип транзакции - продажа, меняем знак цены на отрицательный
+        transactionPrice = -transactionPrice;
+        coinAmount = -coinAmount;
+      }
+
+      // Обновление сводной информации
+      if (coinName in this.transactionsSummary) {
+        this.transactionsSummary[coinName].totalTransactionPrice += transactionPrice;
+        this.transactionsSummary[coinName].totalCoinAmount += coinAmount;
+      } else {
+        this.transactionsSummary[coinName] = {
+          totalTransactionPrice: transactionPrice,
+          totalCoinAmount: coinAmount
+        };
+      }
+
+      // Создание новой транзакции
+      const newTransaction = {
+        transactionType,
+        transactionPrice,
+        coinAmount,
+        transactionDate: this.transactionDate,
+        transactionNote: this.transactionNote
+      };
+
+      // Обновление деталей транзакций
+      if (coinName in this.transactionsDetails) {
+        this.transactionsDetails[coinName].push(newTransaction);
+      } else {
+        this.transactionsDetails[coinName] = [newTransaction];
+      }
+      // Пересчет общей стоимости всех активов
+      this.calculateTotalAssetsForAllCoins();
+      // Сброс значений формы
+      this.coinName = '';
+      this.transactionType = 'buy';
+      this.transactionPrice = '';
+      this.coinAmount = '';
+      this.transactionDate = '';
+      this.transactionNote = '';
+    },
+    removeTransaction(coinName, index) {
+      const transaction = this.transactionsDetails[coinName][index];
+      const transactionPrice = transaction.transactionPrice;
+      const coinAmount = transaction.coinAmount;
+
+      this.transactionsDetails[coinName].splice(index, 1);// Удаление транзакции из массива
+
+      // Обновление сводной информации в основной таблице
+      this.transactionsSummary[coinName].totalTransactionPrice -= transactionPrice;
+      this.transactionsSummary[coinName].totalCoinAmount -= coinAmount;
+
+      this.updateTotalAssets();// Обновление общих активов
+
+      // Проверка, нужно ли удалить валюту из основной таблицы
+      if (this.transactionsDetails[coinName].length === 0) {
+        delete this.transactionsDetails[coinName];
+        delete this.transactionsSummary[coinName];
+      }
+    },
+    removeCoin(coinName) {
+      // Удаление валюты из основной таблицы и деталей транзакций
+      delete this.transactionsDetails[coinName];
+      delete this.transactionsSummary[coinName];
+      this.updateTotalAssets(); // Обновление общих активов
+    },
+    updateTotalAssets() {
+      let totalAssets = 0;
+      for (const coinName in this.transactionsSummary) {
+        const summary = this.transactionsSummary[coinName];
+        summary.totalAssets = (summary.totalTransactionPrice * summary.totalCoinAmount).toFixed(2);
+        totalAssets += parseFloat(summary.totalAssets);
+      }
+      this.totalAssets = totalAssets.toFixed(2);
+    },
+    calculateTotalAssets(summary) {
+      return (summary.totalTransactionPrice * summary.totalCoinAmount).toFixed(2); // Вывод общего актива по названию валюты
+    },
+    calculateTransactionAssets(transaction) {
+      return (transaction.transactionPrice * transaction.coinAmount).toFixed(2); // Вывод общего актива для каждой транзакции
+    },
+    calculateTotalAssetsForAllCoins() {
+      let total = 0;
+      for (const coinName in this.transactionsSummary) {
+        const summary = this.transactionsSummary[coinName];
+        total += summary.totalTransactionPrice * summary.totalCoinAmount;
+      }
+      this.totalAssets = total.toFixed(2);
+    },
+    // addTransaction(transaction) {
+    //   this.transactions.push(transaction);
+    //   // this.transactionsSummary.push(transaction);
+    //   console.log(this.transactions)
+    // },
     openProfMenu() {
       this.visibleProfMenu = this.visibleProfMenu === false;
+    },
+    openLang() {
+      this.visibleLang = this.visibleLang === false;
     },
     openTransactionModal() {
       this.showTransactionModal = true;
@@ -166,16 +416,14 @@ export default {
     closeTransactionCoinModal() {
       this.showTransactionCoinModal = false;
     },
+    // closeModal() {
+    //   this.$emit('close');
+    // },
   },
 }
 </script>
 
 <style>
-.chart {
-  width: 400px;
-  height: 400px;
-  margin: 20px auto;
-}
 .home{
   width: 100%;
   height: 100%;
@@ -269,6 +517,131 @@ tr{
 .add-wallet:hover{
   background-color: rgba(30, 44, 57, 0.73);
 }
+.add-modal{
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  -webkit-box-pack: center;
+  -webkit-box-align: center;
+  top: 0;
+  left: 0;
+  background: rgba(10, 30, 66, 0.4);
+  z-index: 1002;
+}
+.add-transaction{
+  max-width: 400px;
+  flex-direction: column;
+  position: absolute;
+  color: #feffff;
+  font-size: 20px;
+  padding: 30px;
+  background: #1e2c39;
+  border-radius: 20px;
+  border: 2px solid rgba(0, 0, 0, 0.14);
+  z-index: 6
+}
+.inForm {
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  padding: 8px;
+  margin-top: 10px;
+  margin-bottom: 30px;
+  font-size: 22px;
+  color: #9598a3;
+  background-color: rgba(149, 152, 163, 0.09);
+  offset: 0;
+  transition:all 0.15s ease-in-out;
+}
+.inForm:hover{
+  box-shadow:0 0 0 3px rgba(117, 123, 130, 0.28);
+  border:2px rgba(23, 23, 23, 0.1) solid;
+}
+.buy_sell{
+  height: 46px;
+  width: 15vh;
+  margin-top: 10px;
+  font-size: 2vh;
+  font-weight: 600;
+  padding: 5px 10px 5px 10px;
+  color: #feffff;
+  background-color: #F0C70B;
+  border: 0;
+  border-radius:15px;
+  transition: background-color .15s ease-in-out;
+}
+.buy_sell:hover{
+  background-color: #faed02;
+  text-decoration: none;
+  cursor: pointer;
+}
+.close-btn{
+  width: 30px;
+  height: 30px;
+  font-size: 30px;
+  font-weight: 800;
+  background: none;
+  border: none;
+  padding-bottom: 10px;
+  color: #324152;
+  align-items: center;
+  transition:all 0.15s ease-in-out;
+}
+.close-btn:hover{
+  color: #9598a3;
+  cursor: pointer;
+}
+.calendar{
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  padding: 8px;
+  width: 37%;
+  margin-top: 10px;
+  margin-bottom: 30px;
+  margin-right: 10px;
+  font-size: 22px;
+  color: #9598a3;
+  background-color: rgba(149, 152, 163, 0.09);
+  offset: 0;
+  transition:all 0.15s ease-in-out;
+}
+.table-info{
+  background: #1e2c39;
+  z-index: 50;
+  height: 65px!important;
+}
+.table-info:hover{
+  background: rgba(149, 152, 163, 0.2);
+}
+.td-small{
+  width: 140px;
+}
+.transaction-modal{
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  -webkit-box-pack: center;
+  -webkit-box-align: center;
+  top: 0;
+  left: 0;
+  background: rgba(10, 30, 66, 0.4);
+  z-index: 1002;
+}
+.table-coin{
+  width: 1380px;
+  min-width: 350px;
+  flex-direction: column;
+  margin: auto;
+  position: absolute;
+  color: #feffff;
+  font-size: 22px;
+  padding: 10px;
+  background: #1e2c39;
+  border-radius: 20px;
+  border: 2px solid rgba(0, 0, 0, 0.14);
+  z-index: 6;
+  border-collapse: collapse;
+  text-align: left;
+}
 .wallet-info{
   height: inherit;
 }
@@ -277,10 +650,24 @@ tr{
   height: 60px;
   justify-content: space-between;
 }
+.delete-coin{
+  width: 40px;
+  height: 40px;
+  border-radius: 100%;
+  border: 0;
+  background: inherit;
+  transition: background-color .15s ease-in-out;
+  z-index: 900;
+}
+.delete-coin:hover{
+  background-color: rgba(255, 255, 255, 0.27);
+  text-decoration: none;
+  cursor: pointer;
+}
 .btn{
-  font-size: 2.5vh;
+  font-size: 2.0vh;
   font-weight: 600;
-  padding: 5px 10px 5px 10px;
+  padding: 10px 10px 10px 10px;
   color: #feffff;
   background-color: #F0C70B;
   border: 0;
@@ -290,6 +677,20 @@ tr{
 .btn:hover{
   background-color: #fff200;
   text-decoration: none;
+  cursor: pointer;
+}
+.alert{
+  margin-right: 15px;
+  align-items: center;
+  height: 50px;
+  border: 0;
+  border-radius:18px;
+  padding: 5px 10px 5px 10px;
+  background-color: rgba(149, 152, 163, 0.75);
+  transition: background-color .15s ease-in-out;
+}
+.alert:hover{
+  background-color: rgba(253, 253, 253, 0.51);
   cursor: pointer;
 }
 .chart{
@@ -312,33 +713,9 @@ tr{
   margin-top: 20px;
   color: #feffff;
 }
-.table-info{
-  background: #1e2c39;
-  z-index: 50;
-  cursor: pointer;
-  height: 65px!important;
-}
-.table-info:hover{
-  background: rgba(149, 152, 163, 0.2);
-}
 .td-small{
   width: 140px;
 }
-.delete-coin{
-  width: 40px;
-  height: 40px;
-  border-radius: 100%;
-  border: 0;
-  background: inherit;
-  transition: background-color .15s ease-in-out;
-  z-index: 100;
-}
-.delete-coin:hover{
-  background-color: rgba(255, 255, 255, 0.27);
-  text-decoration: none;
-  cursor: pointer;
-}
-
 .prof{
   height: 60px;
   width: 60px;
