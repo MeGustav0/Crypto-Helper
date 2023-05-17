@@ -15,8 +15,9 @@
               <img src="/img/icons/language-svgrepo-com.svg" style="width: 35px;height: 35px;" alt="">
             </button>
             <div class="prof_menu flex" style="min-width: 100px!important;transform: translate3d(-52px, 0px, 0px);" v-show="visibleLang">
-              <button class="dwn-itm flex" @click="changeLanguage('ru')">RU</button>
-              <button class="dwn-itm flex" @click="changeLanguage('en')">EN</button>
+<!--              @click="changeLanguage('ru')"-->
+              <button @click="changeLanguage('ru')" class="dwn-itm flex" >RU</button>
+              <button @click="changeLanguage('en')" class="dwn-itm flex" >EN</button>
             </div>
           </div>
           <div>
@@ -24,9 +25,9 @@
               <img src="/img/icons/img.svg" style="width: 55px;height: 55px; fill: #fff200;" alt="">
             </button>
             <div class="prof_menu flex" v-show="visibleProfMenu">
-              <button class="dwn-itm flex" @click="showProfile = true">Profile</button>
+              <button class="dwn-itm flex" @click="showProfile = true">{{ $t('profile') }}</button>
               <button class="dwn-itm flex" >FAQ</button>
-              <button class="dwn-itm flex" style="border: 0" @click="openExitMenu = true">Exit</button>
+              <button class="dwn-itm flex" style="border: 0" @click="openExitMenu = true">{{ $t('Exit') }}</button>
             </div>
           </div>
 
@@ -38,7 +39,7 @@
     <div class="portfolio flex">
       <div class="butt-wall flex fl-mid">
         <div class="balance" style="font-size: 20px; font-weight: 600;">
-          <div style="font-size: 15px; color: #9598a3">current balance</div>
+          <div style="font-size: 15px; color: #9598a3">{{ $t('current_balance') }}</div>
           <div style="font-size: 35px; color: #feffff">{{ totalAssets }}</div>
           <div style="font-size: 15px; color: green">+ $2323 (3,34%)</div>
         </div>
@@ -47,7 +48,7 @@
             <img src="/img/icons/notification-copy-svgrepo-com.svg" style="width: 32px; height: 40px; fill: #feffff;" alt="">
           </button>
           <button class="btn fl-mid" style="height: 50px" @click="openTransactionModal">
-            add transaction
+            {{ $t('add_transaction') }}
           </button>
         </div>
       </div>
@@ -78,24 +79,24 @@
         </div>
         <div class="table">
           <div class="flex" style="justify-content: space-between">
-            <p style="font-size: 35px; color: #feffff;  padding:10px; ">Assets</p>
-            <button style="margin: 10px" class="btn" @click="openTransactionCoinModal">Подробнее по транзакциям</button>
+            <p style="font-size: 35px; color: #feffff;  padding:10px; ">{{ $t('Assets') }}</p>
+            <button style="margin: 10px" class="btn" @click="openTransactionCoinModal">{{ $t('more_transact') }}</button>
           </div>
           <table class="table_main">
             <thead>
             <tr>
               <th style="padding-left: 10px">
-                <div>Name</div></th>
+                <div>{{ $t('Name') }}</div></th>
               <th>
-                <div >Price</div></th>
+                <div >{{ $t('Price') }}</div></th>
               <th class="fl-mid">
-                <div>24 h.</div></th>
+                <div>{{ $t('24_h') }}</div></th>
               <th>
-                <div>Assets</div></th>
+                <div>{{ $t('Assets') }}</div></th>
               <th>
-                <div >profit/loss</div></th>
+                <div >{{ $t('profitLoss') }}</div></th>
               <th style="text-align: center;" class="fl-mid td-small">
-                <div>Delete coin</div></th>
+                <div>{{ $t('Delete_coin') }}</div></th>
             </tr>
             </thead>
             <tbody >
@@ -122,22 +123,18 @@
                     </button>
                   </div>
                 </th>
-
               </tr>
-<!--            <AssetsTable />-->
-<!--            <TransactionCoinModal  @close="closeTransactionCoinModal" :transactions="transactions" :key="transactions.coinName" />-->
             </tbody>
           </table>
         </div>
       </div>
     </div>
-
     <div class="ex-modal flex fl-mid" v-if="openExitMenu">
       <div class="ex-que flex">
-        <div class="-ff" style="padding: 30px; font-size: 26px; text-align: center">Are you sure you want to leave the page?</div>
+        <div class="-ff" style="padding: 30px; font-size: 26px; text-align: center">{{ $t('you_sure?') }}</div>
         <div class="flex">
-          <button class="Ex-btn" style="margin: 15px" @click="exit">Exit</button>
-          <button class="Ex-btn" style="margin: 15px" @click="openExitMenu = false">Cancel</button>
+          <button class="Ex-btn" style="margin: 15px" @click="exit">{{ $t('Exit') }}</button>
+          <button class="Ex-btn" style="margin: 15px" @click="openExitMenu = false">{{ $t('Cancel') }}</button>
         </div>
       </div>
     </div>
@@ -147,42 +144,42 @@
     <div class="add-transaction flex">
       <!-- Form for adding a transaction -->
       <div class="flex" style="justify-content: space-between;padding-bottom: 30px; font-size: 30px">
-        <label for="coin-name">Adding a Transaction</label>
+        <label for="coin-name">{{ $t('AddingTransaction') }}</label>
         <button class="close-btn"  @click="closeTransactionModal">✕
           <i></i>
         </button>
       </div>
-      <label for="coin-name">Название криптовалюты:</label>
+      <label for="coin-name">{{ $t('NameCryptocurrency') }}</label>
       <input class="inForm" type="text" v-model="coinName" required>
-      <label for="coin-amount">Количество:</label>
+      <label for="coin-amount">{{ $t('Quantity') }}</label>
       <div class="flex">
         <div class="flex" style="flex-direction: column;">
           <input class="inForm" style="width: 80%" type="number" v-model="coinAmount" min="0" step="0.0001" required>
         </div>
         <div class="flex">
           <select class="buy_sell" v-model="transactionType" required>
-            <option value="buy">Покупка</option>
-            <option value="sell">Продажа</option>
+            <option value="buy">{{ $t('Purchase') }}</option>
+            <option value="sell">{{ $t('Sale') }}</option>
           </select>
         </div>
       </div>
-      <label for="transaction-price">Цена:</label>
+      <label for="transaction-price">{{ $t('Price') }}</label>
       <input class="inForm" type="number" v-model="transactionPrice" min="0" step="0.01" required>
-      <label for="transaction-date">Дата транзакции:</label>
+      <label for="transaction-date">{{ $t('Transaction_Date') }}</label>
       <div>
         <input class="calendar" type="date" v-model="transactionDate" required>
-        <input class="inForm" style="width: 51%" placeholder="Заметка" v-model="transactionNote">
+        <input class="inForm" style="width: 51%" :placeholder="$t('Note')" v-model="transactionNote">
       </div>
-      <button :disabled="isFormIncomplete" class="btn" @click="addTransaction">Добавить транзакцию</button>
+      <button :disabled="isFormIncomplete" class="btn" @click="addTransaction">{{ $t('AddingTransaction') }}</button>
     </div>
   </div>
 
   <div class="transaction-modal flex fl-mid" v-if="showTransactionCoinModal" @click="closeTransactionCoinModal" >
     <p style="font-size: 50px; color: #9598a3">Вы еще не добавили не одной транзакции...</p>
-    <div class="table-coin flex" style="z-index: 2000" v-for="(transactionList, coinName) in transactionsDetails" :key="coinName">
+    <div class="table-coin flex" style="z-index: 2000" >
       <!--    v-for="transaction in transactions" :key="transaction.coinName"-->
       <div class="flex" style="justify-content: space-between;padding-bottom: 30px; font-size: 30px">
-        <p style="font-size: 35px; color: #feffff;  padding:10px; ">Подробная информация по транзакциям</p>
+        <p style="font-size: 35px; color: #feffff;  padding:10px; ">{{ $t('more_transact') }}</p>
         <button class="close-btn " @click="closeTransactionCoinModal" >✕
           <i ></i>
         </button>
@@ -191,22 +188,22 @@
         <thead>
         <tr style="border-bottom: rgba(254,255,255,0.35) solid 1px;">
           <th style="padding-left: 10px">
-            <div>Type</div>
+            <div>{{ $t('Type') }}</div>
           </th>
           <th>
-            <div>Price</div>
+            <div>{{ $t('Price') }}</div>
           </th>
           <th class="fl-mid">
-            <div>24 h.</div>
+            <div>{{ $t('24_h') }}</div>
           </th>
           <th>
-            <div >Assets</div>
+            <div >{{ $t('Assets') }}</div>
           </th>
           <th>
-            <div >Notes</div>
+            <div >{{ $t('Notes') }}</div>
           </th>
           <th style="text-align: center;" class="fl-mid td-small">
-            <div>Delete trade</div>
+            <div>{{ $t('Delete_coin') }}</div>
           </th>
         </tr>
         </thead>
@@ -243,8 +240,6 @@
       </table>
     </div>
   </div>
-<!--  <TransactionModal v-if="showTransactionModal" @close="closeTransactionModal"  @add-transaction="handleTransactionAdded" />-->
-<!--  <TransactionModal @add-transaction="addTransaction" v-if="showTransactionModal" @close="closeTransactionModal" />-->
 
 </template>
 
