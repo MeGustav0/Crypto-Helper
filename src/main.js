@@ -4,7 +4,6 @@ import './registerServiceWorker'
 import router from './router'
 import store from './store'
 import {createI18n, useI18n} from "vue-i18n";
-
 import {languages} from "@/index";
 import {defaultLocale} from "@/index";
 

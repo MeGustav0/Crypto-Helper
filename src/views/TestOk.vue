@@ -69,6 +69,23 @@
     <div class="total-assets" style="margin-left: 400px; margin-top: 20px">
       Общие активы: {{ totalAssets }}
     </div>
+
+    <div>
+      <form @submit="getCurrencyPrice">
+        <label for="currency">Выберите валюту:</label>
+        <select id="currency" v-model="selectedCurrency">
+          <option v-for="currency in currencies" :value="currency.id" :key="currency.id">
+            {{ currency.name }}
+          </option>
+        </select>
+        <button type="submit">Получить цену</button>
+      </form>
+      <div v-if="currentPrice">
+        <h2>Текущая цена для {{ selectedCurrency }}:</h2>
+        <p>{{ currentPrice }}</p>
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -85,7 +102,18 @@ export default {
       transactionsSummary: {}, // Сводная информация о транзакциях
       transactionsDetails: {}, // Детали транзакций
       totalAssets: 0, // Добавлено свойство для общих активов
+      currencies: [],
+      selectedCurrency: '',
+      currentPrice: null,
     };
+  },
+  mounted() {
+    // Выполняем запрос к API CoinMarketCap для получения списка валют
+    fetch('https://api.coinmarketcap.com/v1/ticker/')
+        .then(response => response.json())
+        .then(data => {
+          this.currencies = data;
+        });
   },
   computed: {
     isFormIncomplete() {
@@ -98,6 +126,15 @@ export default {
     },
   },
   methods: {
+    getCurrencyPrice(event) {
+      event.preventDefault();
+      // Выполняем запрос к API CoinMarketCap для получения текущей цены выбранной валюты
+      fetch(`https://api.coinmarketcap.com/v1/ticker/${this.selectedCurrency}`)
+          .then(response => response.json())
+          .then(data => {
+            this.currentPrice = data[0].price_usd; // Здесь предполагается, что вы хотите получить цену в USD
+          });
+    },
     addTransaction() {
       // Получение данных из формы
       const coinName = this.coinName;

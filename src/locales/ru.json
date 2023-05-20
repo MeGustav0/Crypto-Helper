@@ -14,7 +14,7 @@
   "Cancel": "Отмена",
   "NameCryptocurrency": "Название криптовалюты:",
   "Quantity": "Количество:",
-  "Purchase": "Купить:",
+  "Purchase": "Купить",
   "Sale": "Продать",
   "Transaction_Date": "Дата транзакции:",
   "Note": "Заметка",
@@ -26,5 +26,11 @@
   "Registration": "Регистрация",
   "UserName": "Имя пользователя",
   "Confirm": "Подтвердить",
-  "Login": "Логин"
+  "Login": "Логин",
+  "AddWALLET": "Создать кошелек",
+  "NameWALLET": "Название кошелька:",
+  "MenuNotification": "Меню уведомление",
+  "AddNotification": "Добавить уведомление:",
+  "save": "Сохранить",
+  "notification_list": "Список уведомлений:"
 }

@@ -22,15 +22,16 @@
         <span class="-ff" style="font-size: 40px;display: flex;justify-content: center; margin-bottom: 20px">Registration</span>
         <div>
           <span class="h1 -ff">User Name</span>
-          <input type="password" class="inForm -ff" >
+          <input type="text" id="username" v-model="username" class="inForm -ff" >
         </div>
         <div>
           <span class="h1 -ff">Login</span>
-          <input type="email" class="inForm -ff" >
+          <input type="email" id="email" v-model="email" class="inForm -ff" >
         </div>
         <div>
           <span class="h1 -ff">Password</span>
-          <input type="password" class="inForm -ff" >
+          <input type="password" id="password" v-model="password" class="inForm -ff" >
+          <p>{{ message }}</p>
         </div>
         <div style="display:flex;margin-top:40px;flex-direction: column;align-items: center; margin-top: 40px">
           <button class="btn" @click="$router.push('/')">Confirm</button>
@@ -43,7 +44,46 @@
 <script>
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
-  name: "reg"
+  name: "reg",
+  data() {
+    return {
+      username: '',
+      email: '',
+      password: '',
+      message: '',
+    };
+  },
+  methods: {
+    async registerUser() {
+      try {
+        const response = await fetch('http://localhost:3000/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            username: this.username,
+            email: this.email,
+            password: this.password,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          this.message = data.message;
+          this.username = '';
+          this.email = '';
+          this.password = '';
+        } else {
+          throw new Error(data.message);
+        }
+      } catch (error) {
+        console.error(error);
+        this.message = 'Произошла ошибка при регистрации пользователя';
+      }
+    },
+  },
 }
 </script>
 
