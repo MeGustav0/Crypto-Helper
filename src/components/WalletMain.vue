@@ -5,7 +5,10 @@
 
       </div>
       <div class="distribution">
-        <h2>Круговая диаграмма</h2>
+        <h2 style="color: #feffff; padding: 10px">Круговая диаграмма</h2>
+        <div>
+          <Doughnut id="my-chart-id" :options="chartOptions" :data="chartData"/>
+        </div>
       </div>
     </div>
     <div class="flex" style="padding-left: 10px; margin-top: 20px">
@@ -40,27 +43,24 @@
         </tr>
         </thead>
         <tbody>
-           <!--          v-if="NameWallet === wallet"-->
-        <tr  v-for="(summary, coinName) in transactionsSummary" :key="coinName" class="table-info" >
-          <!--        v-for="transaction in transactions" :key="transaction.coinName"-->
+        <tr  v-for="(existingTable, coinName) in this.userStore.viewTransactionForName" :key="coinName" class="table-info" >
           <th style="padding-left: 10px">
-            <div>{{ coinName }}</div>
-<!--            <div>{{ summary.wallet }}</div>-->
+            <div>{{ existingTable.coinName }}</div>
           </th>
           <th>
-            <div>{{ summary.totalTransactionPrice }}</div>
+            <div>{{ existingTable.currentPrice }}</div>
           </th>
           <th class="fl-mid">
             <div>+ $3 (2%)</div></th>
           <th>
-            <div>{{ calculateTotalAssets(summary) }}</div>
-            <div style="font-size: 12px; color: #9598a3">{{ summary.totalCoinAmount }}</div>
+            <div>{{ existingTable.currentPrice * existingTable.coinAmount }}</div>
+            <div style="font-size: 12px; color: #9598a3">{{ existingTable.coinAmount }}</div>
           </th>
           <th>
             <div>profit/loss</div></th>
           <th class="fl-mid td-small">
             <div style="text-align: center;" >
-              <button class="delete-coin" @click="removeCoin(coinName)">
+              <button class="delete-coin" >
                 <img src="/img/icons/trash-1-svgrepo-com.svg" style="width: 30px; height: 40px;" alt="">
               </button>
             </div>
@@ -70,44 +70,8 @@
       </table>
     </div>
 
-    <div class="modal flex fl-mid" v-if="showTransactionModal" >
-      <div class="add-transaction flex">
-        <!-- Form for adding a transaction -->
-        <div class="flex" style="justify-content: space-between;padding-bottom: 30px; font-size: 30px">
-          <label for="coin-name">{{ $t('AddingTransaction') }}</label>
-          <button class="close-btn"  @click="closeTransactionModal">✕
-            <i></i>
-          </button>
-        </div>
-        <label for="coin-name">{{ $t('NameCryptocurrency') }}</label>
-          <input class="inForm" type="text" @click="openCurrencyList" v-model="coinName"  required>
-          <ul v-show="showCurrencyList">
-            <li v-for="currency in currencies" :key="currency" @click="selectCurrency(currency)">{{ currency }}</li>
-          </ul>
-        <label for="coin-amount">{{ $t('Quantity') }}</label>
-        <div class="flex">
-          <div class="flex" style="flex-direction: column;">
-            <input class="inForm" style="width: 80%" type="number" v-model="coinAmount" min="0" step="0.0001" required>
-          </div>
-          <div class="flex">
-            <select class="buy_sell" v-model="transactionType" required>
-              <option value="buy">{{ $t('Purchase') }}</option>
-              <option value="sell">{{ $t('Sale') }}</option>
-            </select>
-          </div>
-        </div>
-        <label for="transaction-price">{{ $t('Price') }}</label>
-        <input class="inForm" type="number" v-model="transactionPrice" min="0" step="0.01" required>
-        <label for="transaction-date">{{ $t('Transaction_Date') }}</label>
-        <div>
-          <input class="calendar" type="datetime-local" v-model="transactionDate"  required>
-          <input class="inForm" style="width: 45.1%" :placeholder="$t('Note')" v-model="transactionNote">
-        </div>
-        <button :disabled="isFormIncomplete" class="btn" @click="addTransaction" >{{ $t('AddingTransaction') }}</button>
-      </div>
-    </div>
 
-    <div class="transaction-modal flex fl-mid" v-if="showTransactionCoinModal" @click="closeTransactionCoinModal" >
+    <div class="transaction-modal flex fl-mid" v-if="showTransactionCoinModal">
       <p style="font-size: 50px; color: #9598a3">Вы еще не добавили не одной транзакции...</p>
       <div class="table-coin flex" style="z-index: 2000" >
 
@@ -140,30 +104,27 @@
             </th>
           </tr>
           </thead>
-<!--          v-if="NameWallet === wallet"-->
-          <tbody v-for="(transactionList, coinName) in transactionsDetails" :key="coinName">
-          <tr v-for="(transaction, index) in transactionList" :key="index" class="table-info">
+          <tbody  >
+          <tr class="table-info" v-for="(transactions, coinName) in this.userStore.transactions" :key="coinName">
             <th style="padding-left: 10px">
-              <div>{{ transaction.transactionType }}{{ coinName }}</div>
-              <div style="font-size: 14px">{{ transaction.transactionDate }}</div>
+              <div>{{ transactions.transactionType }}  {{ transactions.coinName }}</div>
+              <div style="font-size: 14px">{{ transactions.transactionDate }}</div>
             </th>
             <th>
-              <div>{{ transaction.transactionPrice }}</div>
+              <div>{{ transactions.transactionPrice }}</div>
             </th>
             <th class="fl-mid">
               <div>+ $3 (2%)</div>
             </th>
             <th>
-              <!--Здесь цена умноженная на количество-->
-              <div>{{ calculateTransactionAssets(transaction) }}</div>
-              <div :class="{'positive': transaction.coinAmount > 0, 'negative': transaction.coinAmount < 0}">{{ transaction.coinAmount }}</div>
+              <div :class="{'positive': transactions.coinAmount > 0, 'negative': transactions.coinAmount < 0}">{{ transactions.coinAmount }}</div>
             </th>
             <th>
-              <div>{{ transaction.transactionNote }}</div>
+              <div>{{ transactions.transactionNote }}</div>
             </th>
             <th style="text-align: center;" class="fl-mid td-small">
               <div>
-                <button class="delete-coin" @click="removeTransaction(coinName, index)">
+                <button class="delete-coin" >
                   <img src="/img/icons/trash-1-svgrepo-com.svg" style="width: 30px; height: 40px;" alt="">
                 </button>
               </div>
@@ -174,14 +135,69 @@
       </div>
     </div>
 
+
+    <div class="modal flex fl-mid" v-if="showTransactionModal" @submit.prevent="getTransactionPrice">
+      <div class="add-transaction flex">
+        <!-- Form for adding a transaction -->
+        <div class="flex" style="justify-content: space-between;padding-bottom: 30px; font-size: 30px">
+          <label>{{ $t('AddingTransaction') }}</label>
+          <button class="close-btn"  @click="closeTransactionModal">✕
+            <i></i>
+          </button>
+        </div>
+        <label for="coin-name">{{ $t('NameCryptocurrency') }}</label>
+
+        <select  class="inForm " id="currency" v-model="coinName">
+          <option class="list_cu" v-for="currency in currencies" :value="currency.id" :key="currency.id">
+            {{ currency.name }}
+          </option>
+        </select>
+        <label for="coin-amount">{{ $t('Quantity') }}</label>
+        <div class="flex">
+          <div class="flex" style="flex-direction: column;">
+            <input class="inForm" style="width: 80%" type="number" v-model="coinAmount" min="0" step="0.0001" required>
+          </div>
+          <div class="flex">
+            <select class="buy_sell" v-model="transactionType" required>
+              <option value="buy">{{ $t('Purchase') }}</option>
+              <option value="sell">{{ $t('Sale') }}</option>
+            </select>
+          </div>
+        </div>
+        <label for="transaction-price">{{ $t('Price') }}</label>
+        <input class="inForm" type="number" v-model="transactionPrice" min="0" step="0.01" v-if="transactionPrice !== null" required>
+        <label for="transaction-date">{{ $t('Transaction_Date') }}</label>
+        <div>
+          <input class="calendar" type="datetime-local" v-model="transactionDate" @change="updatedSelectedCurrencyAndDate()" required>
+          <input class="inForm" style="width: 44%" :placeholder="$t('Notes')" v-model="transactionNote">
+        </div>
+        <button :disabled="isFormIncomplete" class="btn" @click="addTransaction" >{{ $t('AddingTransaction') }}</button>
+      </div>
+    </div>
+
+
+
   </div>
 </template>
 
 <script>
+import {useUserStore} from '../store/index'
+import axios from 'axios';
+import {Doughnut} from 'vue-chartjs'
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
+ChartJS.register(ArcElement, Tooltip, Legend)
+
 export default {
   name: "WalletMain",
+  components: {
+    Doughnut
+  },
   data() {
     return {
+      chartOptions: {
+        responsive: true,
+        maintainAspectRatio: false,
+      },
       showTransactionModal: false,
       showTransactionCoinModal: false,
       showCurrencyList: false,
@@ -192,21 +208,19 @@ export default {
       transactionDate: '',
       transactionNote: '',
       NameWallet: '',
-      transactionsSummary: {}, // Сводная информация о транзакциях
       transactionsDetails: {}, // Детали транзакций
       totalAssets: 0, // Добавлено свойство для общих активов
       currentDate: null,
-      currencies: ['USD', 'EUR', 'GBP', 'JPY'],
-      data: {
-        labels: ['Red', 'Blue', 'Yellow'],
-        datasets: [
-          {
-            data: [10, 20, 30],
-            backgroundColor: ['#ff6384', '#36a2eb', '#ffce56'],
-          },
-        ],
-      },
+      currencies: [],
+      currentPrice: null,
     };
+  },
+  setup() {
+    const userStore = useUserStore();
+
+    return {
+      userStore
+    }
   },
   computed: {
     isFormIncomplete() {
@@ -217,79 +231,48 @@ export default {
           this.transactionDate === ''
       );
     },
+    chartData() {
+      return {
+        labels: ['btn','eth'],
+        plugins: {
+          colors: {
+            enabled: false
+          }
+        },
+        datasets: [{
+            backgroundColor: ['rgb(32,151,98)', '#E46651', '#1d8ca2', '#DD1B16'],
+            data: [40, 20, 80, 10]
+          }]
+      }
+    },
   },
   methods:{
-    openCurrencyList() {
-      this.showCurrencyList = true;
-    },
-    selectCurrency(currency) {
-      this.coinName = currency;
-      this.showCurrencyList = false;
-    },
-    // createChart() {
-    //   const chartData = {
-    //     labels: Object.keys(this.transactionsSummary),
-    //     datasets: [
-    //       {
-    //         data: Object.values(this.transactionsSummary).map(summary =>
-    //             this.calculateTotalAssets(summary)
-    //         ),
-    //         backgroundColor: [
-    //           '#FF6384',
-    //           '#36A2EB',
-    //           '#FFCE56',
-    //           // Добавьте цвета по мере необходимости
-    //         ],
-    //       },
-    //     ],
-    //   };
-    //   new Chart(this.$refs.chart, {
-    //     type: 'doughnut',
-    //     data: chartData,
-    //   });
-    // },
-    addTransaction() {
+    async addTransaction() {
       // Получение данных из формы
       const coinName = this.coinName;
       const transactionType = this.transactionType;
       let transactionPrice = Number(this.transactionPrice);
       let coinAmount = Number(this.coinAmount);
-      // let wallet = this.wallet;
+
       // Проверка типа транзакции
       if (transactionType === 'sell') {
-        // Если тип транзакции - продажа, меняем знак цены на отрицательный
         transactionPrice = -transactionPrice;
         coinAmount = -coinAmount;
       }
 
-      // Обновление сводной информации
-      if (coinName in this.transactionsSummary) {
-        this.transactionsSummary[coinName].totalTransactionPrice += transactionPrice;
-        this.transactionsSummary[coinName].totalCoinAmount += coinAmount;
-      } else {
-        this.transactionsSummary[coinName] = {
-          totalTransactionPrice: transactionPrice,
-          totalCoinAmount: coinAmount
-        };
-      }
-
+      const currentPrice = await this.userStore.getCurrentPrice(coinName);
       // Создание новой транзакции
       const newTransaction = {
+        coinName,
         transactionType,
-        transactionPrice,
+        transactionPrice: Math.abs(transactionPrice),
         coinAmount,
+        price: currentPrice, // Используем полученную текущую цену
         transactionDate: this.transactionDate,
         transactionNote: this.transactionNote,
         wallet: this.wallet,
       };
-      // Обновление деталей транзакций
-      if (coinName in this.transactionsDetails) {
-        this.transactionsDetails[coinName].push(newTransaction);
-      } else {
-        this.transactionsDetails[coinName] = [newTransaction];
-      }
-      // Пересчет общей стоимости всех активов
-      this.calculateTotalAssetsForAllCoins();
+
       // Сброс значений формы
       this.coinName = '';
       this.transactionType = 'buy';
@@ -298,58 +281,69 @@ export default {
       this.transactionDate = '';
       this.transactionNote = '';
 
-
       this.showTransactionModal = false;
 
-      console.log(newTransaction)
+      // Проверка наличия таблицы с таким же coinName
+      const existingTable = this.userStore.viewTransactionForName.find(item => item.coinName === coinName);
+      if (existingTable) {
+        // Обновление данных в существующей таблице
+        existingTable.transactionType = transactionType;
+        existingTable.transactionPrice = Math.abs(transactionPrice);
+        existingTable.coinAmount += coinAmount;
+        existingTable.price = currentPrice;
+        existingTable.transactionDate = this.transactionDate;
+        existingTable.transactionNote = this.transactionNote;
+      } else {
+        // Добавление новой таблицы
+        this.userStore.arrTransactions.push(newTransaction);
+      }
+      this.userStore.transactions.push(newTransaction);
+      console.log(this.userStore.arrTransactions);
+      await this.userStore.filterTransactions()
+
     },
-    removeTransaction(coinName, index) {
-      const transaction = this.transactionsDetails[coinName][index];
-      const transactionPrice = transaction.transactionPrice;
-      const coinAmount = transaction.coinAmount;
-
-      this.transactionsDetails[coinName].splice(index, 1);// Удаление транзакции из массива
-
-      // Обновление сводной информации в основной таблице
-      this.transactionsSummary[coinName].totalTransactionPrice -= transactionPrice;
-      this.transactionsSummary[coinName].totalCoinAmount -= coinAmount;
-
-      this.updateTotalAssets();// Обновление общих активов
-
-      // Проверка, нужно ли удалить валюту из основной таблицы
-      if (this.transactionsDetails[coinName].length === 0) {
-        delete this.transactionsDetails[coinName];
-        delete this.transactionsSummary[coinName];
+    updatedSelectedCurrencyAndDate() {
+      if (this.coinName && this.transactionDate) {
+        this.getTransactionPrice();
+      } else {
+        this.transactionPrice = null;
       }
     },
-    removeCoin(coinName) {
-      // Удаление валюты из основной таблицы и деталей транзакций
-      delete this.transactionsDetails[coinName];
-      delete this.transactionsSummary[coinName];
-      this.updateTotalAssets(); // Обновление общих активов
-    },
-    updateTotalAssets() {
-      let totalAssets = 0;
-      for (const coinName in this.transactionsSummary) {
-        const summary = this.transactionsSummary[coinName];
-        summary.totalAssets = (summary.totalTransactionPrice * summary.totalCoinAmount).toFixed(2);
-        totalAssets += parseFloat(summary.totalAssets);
+    async getTransactionPrice() {
+      try {
+        const startDate = new Date(this.transactionDate).getTime();
+        const endDate = startDate + 24 * 60 * 60 * 1000; // Добавляем 24 часа для установки конечной даты на следующий день
+
+        // Запрос к API для получения исторических данных о цене валюты
+        const response = await axios.get(`https://api.coincap.io/v2/assets/${this.coinName}/history`, {
+          params: {
+            interval: 'd1', // ежедневные данные
+            start: startDate, // числовое значение начальной даты
+            end: endDate // числовое значение конечной даты
+          }
+        });
+
+        const data = response.data;
+        if (data && data.data.length > 0) {
+          const price = data.data[0].priceUsd; // Получаем цену из свойства "priceUsd"
+          this.transactionPrice = price;
+        } else {
+          this.transactionPrice = null; // Если данные не найдены, устанавливаем значение null
+        }
+      } catch (error) {
+        console.error(error);
+        this.transactionPrice = null; // В случае ошибки устанавливаем значение null
       }
-      this.totalAssets = totalAssets.toFixed(2);
     },
-    calculateTotalAssets(summary) {
-      return (summary.totalTransactionPrice * summary.totalCoinAmount).toFixed(2); // Вывод общего актива по названию валюты
-    },
-    calculateTransactionAssets(transaction) {
-      return (transaction.transactionPrice * transaction.coinAmount).toFixed(2); // Вывод общего актива для каждой транзакции
-    },
-    calculateTotalAssetsForAllCoins() {
-      let total = 0;
-      for (const coinName in this.transactionsSummary) {
-        const summary = this.transactionsSummary[coinName];
-        total += summary.totalTransactionPrice * summary.totalCoinAmount;
-      }
-      this.totalAssets = total.toFixed(2);
+    loadCurrencies() {
+      axios
+          .get('https://api.coincap.io/v2/assets')
+          .then(response => {
+            this.currencies = response.data.data;
+          })
+          .catch(error => {
+            console.log(error);
+          });
     },
     closeTransactionModal() {
       this.showTransactionModal = false;
@@ -373,6 +367,7 @@ export default {
   },
   mounted() {
     this.$emit('total-assets-updated', this.totalAssets);
+    this.loadCurrencies();
   },
   props: {
     wallet: {
@@ -416,9 +411,17 @@ export default {
   text-decoration: none;
   cursor: pointer;
 }
+.flex{
+  display: flex;
+}
+.fl-mid{
+  align-items: center;
+  justify-content: center;
+}
 .close-btn{
   width: 30px;
   height: 30px;
+  line-height: 30px;
   font-size: 30px;
   font-weight: 800;
   background: none;
@@ -445,6 +448,9 @@ export default {
   background-color: rgba(149, 152, 163, 0.09);
   offset: 0;
   transition:all 0.15s ease-in-out;
+}
+option{
+  background-color: #324152;
 }
 .table-info{
   background: #1e2c39;

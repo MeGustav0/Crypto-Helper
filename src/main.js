@@ -2,10 +2,11 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import './registerServiceWorker'
 import router from './router'
-import store from './store'
+// import store from './store'
 import {createI18n, useI18n} from "vue-i18n";
 import {languages} from "@/index";
 import {defaultLocale} from "@/index";
+import { createPinia } from 'pinia';
 
 const savedLanguage = localStorage.getItem('language');
 
@@ -22,4 +23,4 @@ createApp(App, {
         const {t} = useI18n()
         return(t)
     }
-}).use(store).use(router).use(i18n).mount('#app')
+}).use(createPinia()).use(router).use(i18n).mount('#app')
