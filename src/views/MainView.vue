@@ -18,14 +18,13 @@
               <img src="/img/icons/language-svgrepo-com.svg" style="width: 35px;height: 35px;" alt="">
             </button>
             <div class="prof_menu flex" style="min-width: 100px!important;transform: translate3d(-52px, 0px, 0px);" v-show="visibleLang">
-<!--              @click="changeLanguage('ru')"-->
               <button @click="changeLanguage('ru')" class="dwn-itm flex" >RU</button>
               <button @click="changeLanguage('en')" class="dwn-itm flex" >EN</button>
             </div>
           </div>
           <div>
             <button class="prof" @click="openProfMenu">
-              <img src="/img/icons/img.svg" style="width: 55px;height: 55px; fill: #fff200;" alt="">
+              <img src="/img/icons/img.svg" style="width: 55px;height: 55px;" alt="">
             </button>
             <div class="prof_menu flex" v-show="visibleProfMenu">
               <button class="dwn-itm flex" @click="showProfile = true">{{ $t('profile') }}</button>
@@ -42,23 +41,24 @@
       <div class="butt-wall flex fl-mid">
         <div class="balance">
           <div style="font-size: 15px; color: #9598a3">{{ $t('current_balance') }}</div>
-          <div style="font-size: 35px; color: #feffff">{{ totalAssets }}</div>
-          <div style="font-size: 15px; color: green">+ $2323 (3,34%)</div>
-        </div>
-        <div class="flex" style="padding-right: 10px;">
-
+          <div style="font-size: 35px; color: #feffff">${{ allAssets }}</div>
         </div>
       </div>
       <div class="num-portfol flex" style="flex-wrap: wrap">
         <div v-for="wallet in walletsList" :key="wallet">
-          <WalletModal :isSelected="wallet === selectedWallet" @click="toggleSelected(wallet)" :wallet="wallet" @open-wallet-info="openWalletInfo" />
+          <WalletModal
+              :isSelected="wallet === selectedWallet"
+              @click="toggleSelected(wallet)" :wallet="wallet"
+              @open-wallet-info="openWalletInfo"
+          />
         </div>
         <div class="add-wallet flex fl-mid" @click="openAddWalletModal">+</div>
       </div>
       <div>
         <WalletMain
             v-if="isWalletInfoOpen"
-            :wallet="selectedWalletName" @total-assets-updated="updateTotalAssets"/>
+            :wallet="selectedWalletName"
+        />
       </div>
       <component :is="activeComponent" :walletName="selectedWalletName"></component>
     </div>
@@ -119,6 +119,7 @@
 </template>
 
 <script>
+import {useUserStore} from '../store/index'
 import router from "@/router";
 import WalletModal from "@/components/WalletModal";
 import WalletMain from "@/components/WalletMain";
@@ -145,9 +146,8 @@ export default {
       notifications: [],
       notificationId: 1,
       activeComponent: null,
-      totalAssets: 0,
       walletsList: [], // Ваш список кошельков
-      selectedWallet: null // Выбранный кошелек
+      selectedWallet: null, // Выбранный кошелек
     };
   },
   computed: {
@@ -161,12 +161,11 @@ export default {
           this.notificationAmount === ''
       );
     },
+    allAssets() {
+      return useUserStore().AllAsset;
+    },
   },
   methods: {
-    exit() {
-      router.push('/')
-      localStorage.clear()
-    },
     openWalletInfo(wallet) {
       this.selectedWalletName = wallet;
       this.isWalletInfoOpen = true;
@@ -184,11 +183,10 @@ export default {
       };
       this.notifications.push(notification);
 
-      if (this.notificationAmount <= this.totalAssets) {
+      if (this.notificationAmount <= this.AllAsset) {
         notification.status = 'Завершено';
         notification.completionDate = new Date().toLocaleDateString();
       }
-
       this.notificationId++;
       this.notificationAmount = 0;
     },
@@ -205,9 +203,6 @@ export default {
       }
       this.walletsList.push(this.NameWallet);
       // Создание нового кошелька с переданным названием
-
-      // Добавление нового кошелька в список или хранилище данных
-      // ...
       this.NameWallet = '';
       this.closeAddWalletModal();
       this.showWalletModal = true;
@@ -226,19 +221,6 @@ export default {
     openLang() {
       this.visibleLang = this.visibleLang === false;
       this.visibleProfMenu = false;
-    },
-    updateTotalAssets(value) {
-      this.totalAssets = value;
-    },
-    openTransactionModal() {
-      this.showTransactionModal = true;
-      const currentDate = new Date();
-      const year = currentDate.getFullYear();
-      const month = String(currentDate.getMonth() + 1).padStart(2, '0');
-      const day = String(currentDate.getDate()).padStart(2, '0');
-      const hours = String(currentDate.getHours()).padStart(2, '0');
-      const minutes = String(currentDate.getMinutes()).padStart(2, '0');
-      this.transactionDate = `${year}-${month}-${day}T${hours}:${minutes}`;
     },
     closeTransactionModal() {
       this.showTransactionModal = false;
@@ -261,18 +243,20 @@ export default {
     closeMenuNotification(){
       this.showMenuNotification = false;
     },
+    exit() {
+      router.push('/')
+      localStorage.clear()
+    },
   },
 }
 </script>
 
 <style>
 .home{
-  width: 100%;
-  height: 100%;
-  background: #324152;
+  background: linear-gradient(to bottom, #384551, #223343);
 }
 .dfg{
-  width: 150vh;
+  width: 130vh;
   justify-content: space-between;
   margin-left: auto;
   margin-right: auto;
@@ -284,7 +268,7 @@ header{
   position: absolute;
 }
 tr{
-  height: 50px;
+  height: 40px;
   border-bottom: rgba(254,255,255,0.35) solid 1px;
 }
 .flex{
@@ -305,9 +289,10 @@ tr{
 }
 .portfolio{
   flex-direction: column;
-  max-width: 150vh;
-  height: 100vh;
+  max-width: 1218px;
+  min-height: 100vh;
   padding-top: 100px;
+  padding-bottom: 50px;
   margin-left: auto;
   margin-right: auto;
   font-family: unset;
@@ -320,7 +305,6 @@ tr{
   font-weight: 600;
 }
 .num-portfol{
-  width: 100%;
   min-height: 60px;
   padding-left: 10px;
   margin-bottom: 20px;
@@ -331,7 +315,7 @@ tr{
   background-color: #1e2c39;
   border-radius: 20px;
   margin-top: 20px;
-  color: #F0C70B;
+  color: #c0862f;
   font-size: 50px;
   font-weight: 700;
   cursor: pointer;
@@ -399,13 +383,13 @@ tr{
   font-weight: 600;
   padding: 10px 10px 10px 10px;
   color: #feffff;
-  background-color: #F0C70B;
+  background-color: #c0862f;
   border: 0;
   border-radius:18px;
   transition: background-color .15s ease-in-out;
 }
 .btn:hover{
-  background-color: #fff200;
+  background-color:  #ef8307;
   text-decoration: none;
   cursor: pointer;
 }
@@ -430,6 +414,7 @@ tr{
   padding: 5px;
   background-color: #243343;
   z-index: 4;
+  transition: transform 0.3s ease, opacity 0.3s ease;
 }
 .dwn-itm {
   background-color: inherit;
@@ -478,13 +463,13 @@ tr{
   font-weight: 600;
   padding: 10px;
   color: #edecec;
-  background-color: #F0C70B;
+  background-color: #c0862f;
   border: 2px solid rgba(0, 0, 0, 0.11);
   border-radius:20px;
   transition: background-color .15s ease-in-out;
 }
 .Ex-btn:hover{
-  background-color: #fff200;
+  background-color: #ef8307;
   text-decoration: none;
   cursor: pointer;
 }

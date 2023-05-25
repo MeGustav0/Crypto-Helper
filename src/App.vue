@@ -16,5 +16,7 @@
   outline: none!important;
   font-family: "Montserrat",Sans-serif,serif;
 }
-
+app{
+  height: 100vh;
+}
 </style>

@@ -8,7 +8,7 @@
         {{ wallet }}
       </div>
       <div class="min-balance">
-        {{ totalAssets }}
+        ${{ totalAssets }}
       </div>
     </div>
   </div>
@@ -16,18 +16,18 @@
 
 <script>
 import {useUserStore} from '../store/index'
+import { computed } from 'vue';
 export default {
   name: "WalletModal",
-
   props: {
     wallet: {
       type: String,
       required: true
     },
-    totalAssets: {
-      type: Number,
-      required: true
-    },
+    // totalAssets: {
+    //   type: Number,
+    //   required: true
+    // },
     isSelected: {
       type: Boolean,
       required: true
@@ -35,25 +35,24 @@ export default {
   },
   setup() {
       const userStore = useUserStore();
-
+    const totalAssets = computed(() => userStore.totalAssets);
       return {
-        userStore
+        userStore,
+        totalAssets
       }
   },
   methods:{
     openWalletInfo(wallet) {
-      this.userStore.wallet = wallet
-      // Вызов соответствующего метода или передача данных в родительский компонент
+      this.userStore.wallet = wallet;
+      this.userStore.filterTransactions();
       this.$emit('open-wallet-info', wallet);
-      this.userStore.filterTransactions()
-    },
-    closeAddWalletModal(){
-      this.showAddWalletModal = false;
     },
     closeModal() {
       this.$emit('close');
     },
-
+    closeAddWalletModal(){
+      this.showAddWalletModal = false;
+    },
   }
 }
 </script>

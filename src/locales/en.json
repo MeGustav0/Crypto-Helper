@@ -32,5 +32,6 @@
   "MenuNotification": "Notification Menu",
   "AddNotification": "Add a notification:",
   "save": "Save",
-  "notification_list": "Notification list:"
+  "notification_list": "Notification list:",
+  "wallet": "Wallet"
 }

@@ -32,5 +32,6 @@
   "MenuNotification": "Меню уведомление",
   "AddNotification": "Добавить уведомление:",
   "save": "Сохранить",
-  "notification_list": "Список уведомлений:"
+  "notification_list": "Список уведомлений:",
+  "wallet": "Кошелек"
 }

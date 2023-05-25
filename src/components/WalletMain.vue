@@ -1,13 +1,16 @@
 <template>
   <div class="wallet-info flex" style="flex-direction: column">
-    <div class="flex" style="width: 100%;">
+    <div class="flex graph" style="width: 100%;">
       <div class="chart-menu">
-
+        <h2 style="color: #feffff; padding: 10px">График</h2>
+        <div style="height: 350px">
+          <Line :data="LineData" :options="options" style="padding: 10px;"/>
+        </div>
       </div>
       <div class="distribution">
-        <h2 style="color: #feffff; padding: 10px">Круговая диаграмма</h2>
+        <h2 style="color: #feffff; padding: 10px">Распределение</h2>
         <div>
-          <Doughnut id="my-chart-id" :options="chartOptions" :data="chartData"/>
+          <Doughnut :data="chartData" :options="chartOptions" />
         </div>
       </div>
     </div>
@@ -44,27 +47,35 @@
         </thead>
         <tbody>
         <tr  v-for="(existingTable, coinName) in this.userStore.viewTransactionForName" :key="coinName" class="table-info" >
-          <th style="padding-left: 10px">
+          <td style="padding-left: 10px">
             <div>{{ existingTable.coinName }}</div>
-          </th>
-          <th>
-            <div>{{ existingTable.currentPrice }}</div>
-          </th>
-          <th class="fl-mid">
-            <div>+ $3 (2%)</div></th>
-          <th>
-            <div>{{ existingTable.currentPrice * existingTable.coinAmount }}</div>
+          </td>
+          <td>
+            <div>${{ existingTable.currentPrice }}</div>
+          </td>
+          <td class="fl-mid">
+            <div>
+<!--              {{existingTable.oneWeekAgoPrice}}-->
+            </div></td>
+          <td>
+            <div>${{ (existingTable.currentPrice * existingTable.coinAmount).toFixed(2) }}</div>
             <div style="font-size: 12px; color: #9598a3">{{ existingTable.coinAmount }}</div>
-          </th>
-          <th>
-            <div>profit/loss</div></th>
-          <th class="fl-mid td-small">
+          </td>
+          <td>
+            <div :class="{
+              'positive': ((existingTable.currentPrice * existingTable.coinAmount) - (existingTable.transactionPrice * existingTable.coinAmount)) / (existingTable.transactionPrice * existingTable.coinAmount) > 0, 
+              'negative': ((existingTable.currentPrice * existingTable.coinAmount) - (existingTable.transactionPrice * existingTable.coinAmount)) / (existingTable.transactionPrice * existingTable.coinAmount) < 0}">
+              {{((((existingTable.currentPrice * existingTable.coinAmount) - (existingTable.transactionPrice * existingTable.coinAmount)) / (existingTable.transactionPrice * existingTable.coinAmount))* 100).toFixed(2) }}%
+            </div>
+            <div>{{((existingTable.currentPrice * existingTable.coinAmount) - (existingTable.transactionPrice * existingTable.coinAmount)).toFixed(2)}}$</div>
+          </td>
+          <td class="fl-mid td-small">
             <div style="text-align: center;" >
               <button class="delete-coin" >
                 <img src="/img/icons/trash-1-svgrepo-com.svg" style="width: 30px; height: 40px;" alt="">
               </button>
             </div>
-          </th>
+          </td>
         </tr>
         </tbody>
       </table>
@@ -72,7 +83,6 @@
 
 
     <div class="transaction-modal flex fl-mid" v-if="showTransactionCoinModal">
-      <p style="font-size: 50px; color: #9598a3">Вы еще не добавили не одной транзакции...</p>
       <div class="table-coin flex" style="z-index: 2000" >
 
         <div class="flex" style="justify-content: space-between;padding-bottom: 30px; font-size: 30px">
@@ -84,14 +94,14 @@
         <table style="border-collapse: collapse;">
           <thead>
           <tr style="border-bottom: rgba(254,255,255,0.35) solid 1px;">
-            <th style="padding-left: 10px">
+            <th style="padding-left: 10px; width: 160px">
               <div>{{ $t('Type') }}</div>
+            </th>
+            <th class="td-small">
+              <div>{{ $t('wallet') }}</div>
             </th>
             <th>
               <div>{{ $t('Price') }}</div>
-            </th>
-            <th class="fl-mid">
-              <div>{{ $t('24_h') }}</div>
             </th>
             <th>
               <div >{{ $t('Assets') }}</div>
@@ -99,36 +109,36 @@
             <th>
               <div >{{ $t('Notes') }}</div>
             </th>
-            <th style="text-align: center;" class="fl-mid td-small">
+            <th style="text-align: center;">
               <div>{{ $t('Delete_coin') }}</div>
             </th>
           </tr>
           </thead>
-          <tbody  >
-          <tr class="table-info" v-for="(transactions, coinName) in this.userStore.transactions" :key="coinName">
-            <th style="padding-left: 10px">
-              <div>{{ transactions.transactionType }}  {{ transactions.coinName }}</div>
-              <div style="font-size: 14px">{{ transactions.transactionDate }}</div>
-            </th>
-            <th>
-              <div>{{ transactions.transactionPrice }}</div>
-            </th>
-            <th class="fl-mid">
-              <div>+ $3 (2%)</div>
-            </th>
-            <th>
-              <div :class="{'positive': transactions.coinAmount > 0, 'negative': transactions.coinAmount < 0}">{{ transactions.coinAmount }}</div>
-            </th>
-            <th>
-              <div>{{ transactions.transactionNote }}</div>
-            </th>
-            <th style="text-align: center;" class="fl-mid td-small">
+          <tbody   v-for="(transactionList, coinName) in transactionsDetails" :key="coinName">
+          <tr class="table-info" v-for="(transaction, index) in transactionList" :key="index">
+            <td style="padding-left: 10px; width: 160px" >
+              <div>{{ transaction.transactionType }}  {{ transaction.coinName }}</div>
+              <div style="font-size: 14px; color: #9598a3">{{ transaction.transactionDate }}</div>
+            </td>
+            <td class="td-small">
+              <div>{{ transaction.wallet }}</div>
+            </td>
+            <td>
+              <div>${{ transaction.transactionPrice }}</div>
+            </td>
+            <td>
+              <div :class="{'positive': transaction.coinAmount > 0, 'negative': transaction.coinAmount < 0}">{{ transaction.coinAmount }}</div>
+            </td>
+            <td>
+              <div>{{ transaction.transactionNote }}</div>
+            </td>
+            <td style="text-align: center;" class="fl-mid td-small">
               <div>
-                <button class="delete-coin" >
+                <button class="delete-coin" @click="removeTransaction(coinName, index)">
                   <img src="/img/icons/trash-1-svgrepo-com.svg" style="width: 30px; height: 40px;" alt="">
                 </button>
               </div>
-            </th>
+            </td>
           </tr>
           </tbody>
         </table>
@@ -149,7 +159,7 @@
 
         <select  class="inForm " id="currency" v-model="coinName">
           <option class="list_cu" v-for="currency in currencies" :value="currency.id" :key="currency.id">
-            {{ currency.name }}
+            {{ currency.symbol }} - {{ currency.name }}
           </option>
         </select>
         <label for="coin-amount">{{ $t('Quantity') }}</label>
@@ -184,16 +194,23 @@
 import {useUserStore} from '../store/index'
 import axios from 'axios';
 import {Doughnut} from 'vue-chartjs'
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
-ChartJS.register(ArcElement, Tooltip, Legend)
+import {Line} from 'vue-chartjs'
+import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement, Title } from 'chart.js'
+import { computed } from 'vue';
+ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement, Title)
 
 export default {
   name: "WalletMain",
   components: {
-    Doughnut
+    Doughnut,
+    Line,
   },
   data() {
     return {
+      options: {
+        responsive: true,
+        maintainAspectRatio: false
+      },
       chartOptions: {
         responsive: true,
         maintainAspectRatio: false,
@@ -203,13 +220,15 @@ export default {
       showCurrencyList: false,
       coinName: '',
       transactionType: 'buy',
-      transactionPrice: '',
+      transactionPrice: 0,
       coinAmount: '',
+      oneWeekAgoPrice: '',
       transactionDate: '',
       transactionNote: '',
       NameWallet: '',
+      PurchaseAssets: '',
       transactionsDetails: {}, // Детали транзакций
-      totalAssets: 0, // Добавлено свойство для общих активов
+      // totalAssets: 0, // Добавлено свойство для общих активов
       currentDate: null,
       currencies: [],
       currentPrice: null,
@@ -217,12 +236,28 @@ export default {
   },
   setup() {
     const userStore = useUserStore();
-
+    const totalAssets = computed(() => userStore.totalAssets);
     return {
-      userStore
+      userStore,
+      totalAssets
     }
   },
   computed: {
+    averageTransactionPrice() {
+      // Расчет средней цены транзакции
+      const transactions = this.userStore.transactions;
+      const transactionCount = Object.keys(transactions).length;
+
+      if (transactionCount === 0) {
+        return 0;
+      }
+      let totalTransactionPrice = 0;
+      for (const coinName in transactions) {
+        const transaction = transactions[coinName];
+        totalTransactionPrice += transaction.transactionPrice;
+      }
+      return totalTransactionPrice / transactionCount;
+    },
     isFormIncomplete() {
       return (
           this.coinName === '' ||
@@ -232,26 +267,64 @@ export default {
       );
     },
     chartData() {
-      return {
-        labels: ['btn','eth'],
-        plugins: {
-          colors: {
-            enabled: false
-          }
-        },
-        datasets: [{
-            backgroundColor: ['rgb(32,151,98)', '#E46651', '#1d8ca2', '#DD1B16'],
-            data: [40, 20, 80, 10]
-          }]
+      const labels = []; // Массив для меток
+      const data = []; // Массив для данных активов
+
+      // Проход по каждой записи в массиве arrTransactions
+      for (const transaction of this.userStore.arrTransactions) {
+        const coinName = transaction.coinName;
+        const totalAssets = transaction.transactionPrice * transaction.coinAmount;
+
+        labels.push(coinName); // Добавить метку
+        data.push(totalAssets); // Добавить данные активов
       }
+      return {
+        labels,
+        datasets: [{
+          backgroundColor: ['rgb(32,151,98)', '#e4d851', '#1d52a2', '#DD1B16', '#E46651', '#1d8ca2'],
+          borderColor: '#324152',
+          data,
+        }],
+      };
     },
+    LineData() {
+    const transactions = this.userStore.arrTransactions;
+    const sortedTransactions = transactions.sort((a, b) => new Date(a.transactionDate) - new Date(b.transactionDate));
+
+    let totalAssets = 0;
+    const labels = [];
+    const data = [];
+
+    for (const transaction of sortedTransactions) {
+      const amount = transaction.coinAmount;
+      const price = transaction.ChartPrice;
+      const transactionDate = transaction.transactionDate;
+
+      console.log(sortedTransactions)
+      totalAssets += transaction.transactionType === 'buy' ? amount * price : -amount * price;
+      labels.push(transactionDate);
+      data.push(totalAssets);
+    }
+
+    return {
+      labels,
+      datasets: [
+        {
+          label: 'Total Assets',
+          backgroundColor: '#ef8307',
+          borderColor: '#ef8307',
+          data,
+        },
+      ],
+    };
+  },
   },
   methods:{
     async addTransaction() {
       // Получение данных из формы
       const coinName = this.coinName;
       const transactionType = this.transactionType;
-      let transactionPrice = Number(this.transactionPrice);
+      let transactionPrice = Number(this.transactionPrice).toFixed(2);
       let coinAmount = Number(this.coinAmount);
 
       // Проверка типа транзакции
@@ -259,20 +332,26 @@ export default {
         transactionPrice = -transactionPrice;
         coinAmount = -coinAmount;
       }
-
       const currentPrice = await this.userStore.getCurrentPrice(coinName);
+      const oneWeekAgoPrice = await this.userStore.getOneWeekAgoPrice(coinName);
       // Создание новой транзакции
       const newTransaction = {
         coinName,
         transactionType,
         transactionPrice: Math.abs(transactionPrice),
+        ChartPrice: transactionPrice,
         coinAmount,
+        oneWeekAgoPrice,
         price: currentPrice, // Используем полученную текущую цену
         transactionDate: this.transactionDate,
         transactionNote: this.transactionNote,
         wallet: this.wallet,
       };
-
+      if (coinName in this.transactionsDetails) {
+        this.transactionsDetails[coinName].push(newTransaction);
+      } else {
+        this.transactionsDetails[coinName] = [newTransaction];
+      }
       // Сброс значений формы
       this.coinName = '';
       this.transactionType = 'buy';
@@ -282,7 +361,6 @@ export default {
       this.transactionNote = '';
 
       this.showTransactionModal = false;
-
       // Проверка наличия таблицы с таким же coinName
       const existingTable = this.userStore.viewTransactionForName.find(item => item.coinName === coinName);
       if (existingTable) {
@@ -291,16 +369,30 @@ export default {
         existingTable.transactionPrice = Math.abs(transactionPrice);
         existingTable.coinAmount += coinAmount;
         existingTable.price = currentPrice;
+        existingTable.oneWeekAgoPrice = this.oneWeekAgoPrice;
         existingTable.transactionDate = this.transactionDate;
         existingTable.transactionNote = this.transactionNote;
       } else {
         // Добавление новой таблицы
         this.userStore.arrTransactions.push(newTransaction);
       }
-      this.userStore.transactions.push(newTransaction);
       console.log(this.userStore.arrTransactions);
       await this.userStore.filterTransactions()
+    },
+    removeTransaction(coinName, index) {
+      const transaction = this.transactionsDetails[coinName][index];
+      const coinAmount = transaction.coinAmount;
 
+      this.transactionsDetails[coinName].splice(index, 1);// Удаление транзакции из массива
+
+      // Обновление сводной информации в основной таблице
+      this.viewTransactionForName[coinName].coinAmount -= coinAmount;
+
+      // Проверка, нужно ли удалить валюту из основной таблицы
+      if (this.transactionsDetails[coinName].length === 0) {
+        delete this.transactionsDetails[coinName];
+        delete this.viewTransactionForName[coinName];
+      }
     },
     updatedSelectedCurrencyAndDate() {
       if (this.coinName && this.transactionDate) {
@@ -380,16 +472,19 @@ export default {
 
 <style >
 .positive {
-  color: green;
+  color: #00ce00;
+  font-weight: 600!important;
 }
 
 .negative {
   color: red;
+  font-weight: 600!important;
 }
 .table_main{
   width: 100%;
   border-top: rgba(254,255,255,0.35) solid 1px;
   padding: 10px;
+  font-weight: normal!important;
   border-collapse: collapse;
   text-align: left;
 }
@@ -401,13 +496,13 @@ export default {
   font-weight: 600;
   padding: 5px 10px 5px 10px;
   color: #feffff;
-  background-color: #F0C70B;
+  background-color: #c0862f;
   border: 0;
   border-radius:15px;
   transition: background-color .15s ease-in-out;
 }
 .buy_sell:hover{
-  background-color: #faed02;
+  background-color:  #ef8307;
   text-decoration: none;
   cursor: pointer;
 }
@@ -474,9 +569,17 @@ option{
   background: rgba(10, 30, 66, 0.4);
   z-index: 1002;
 }
+@media (max-width: 1000px) {
+  .table-coin {
+    font-size: 2vw!important;
+  }
+  .table-info{
+    font-size: 1.8vw!important;
+  }
+}
 .table-coin{
-  width: 1380px;
-  min-width: 350px;
+  width: 90vw;
+  /*min-width: 350px;*/
   flex-direction: column;
   margin: auto;
   position: absolute;
@@ -514,6 +617,7 @@ option{
   background: #1e2c39;
   border-radius: 5px;
 }
+
 .distribution{
   width: 40%;
   height: 400px;

@@ -33,7 +33,7 @@
           <input type="password" id="password" v-model="password" class="inForm -ff" >
           <p>{{ message }}</p>
         </div>
-        <div style="display:flex;margin-top:40px;flex-direction: column;align-items: center; margin-top: 40px">
+        <div style="display:flex;margin-top:40px;flex-direction: column;align-items: center;">
           <button class="btn" @click="$router.push('/')">Confirm</button>
         </div>
       </div>
@@ -108,7 +108,7 @@ export default {
   padding:15px;
   background-color: #324152;
   border-radius: 30px;
-  -webkit-box-shadow: 0px 5px 50px 0px rgba(0, 0, 0, 0.3);
+  -webkit-box-shadow: 0 5px 50px 0 rgba(0, 0, 0, 0.3);
 }
 .content{
   width: 100%;
