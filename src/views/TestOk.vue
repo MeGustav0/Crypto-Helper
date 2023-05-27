@@ -10,19 +10,21 @@
     </div>
 
     <table v-if="transactions.length > 0">
-      <thead>
-      <tr>
-        <th>Currency</th>
-        <th>Price</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr v-for="transaction in transactions" :key="transaction.id">
-        <td>{{ transaction.symbol }}</td>
-        <td>{{ transaction.price }}</td>
-      </tr>
-      </tbody>
-    </table>
+  <thead>
+    <tr>
+      <th>Currency</th>
+      <th>Price</th>
+      <th>Change (%)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr v-for="transaction in transactions" :key="transaction.id">
+      <td>{{ transaction.symbol }}</td>
+      <td>{{ transaction.price }}</td>
+      <td>{{ transaction.change7d }}</td>
+    </tr>
+  </tbody>
+</table>
     <p v-else>No transactions available.</p>
   </div>
 </template>
@@ -42,27 +44,51 @@ export default {
     addTransaction() {
       if (this.coinName) {
         axios.get(`https://api.coincap.io/v2/assets/${this.coinName}`)
-            .then(response => {
-              const transaction = {
-                id: this.transactions.length + 1,
-                symbol: response.data.data.symbol,
-                price: response.data.data.priceUsd
-              };
-              this.transactions.push(transaction);
-            })
-            .catch(error => {
-              console.error(error);
-            });
-      }
-    },
-    loadCurrencies() {
-      axios.get('https://api.coincap.io/v2/assets')
           .then(response => {
-            this.currencies = response.data.data;
+            const transaction = {
+              id: this.transactions.length + 1,
+              symbol: response.data.data.symbol,
+              price: response.data.data.priceUsd,
+              change7d: 0 // Изменение цены за 7 дней, изначально 0
+            };
+
+            this.getHistoricalData(transaction);
           })
           .catch(error => {
             console.error(error);
           });
+      }
+    },
+    getHistoricalData(transaction) {
+      const endDate = new Date();
+      const startDate = new Date();
+      startDate.setDate(endDate.getDate() - 7);
+
+      axios.get(`https://api.coincap.io/v2/assets/${this.coinName}/history?interval=d1&start=${startDate.getTime()}&end=${endDate.getTime()}`)
+        .then(historyResponse => {
+          const historyData = historyResponse.data.data;
+
+          if (historyData.length >= 2) {
+            const startPrice = historyData[0].priceUsd;
+            const endPrice = historyData[historyData.length - 1].priceUsd;
+            const percentChange = ((endPrice - startPrice) / startPrice) * 100;
+            transaction.change7d = percentChange.toFixed(2);
+          }
+
+          this.transactions.push(transaction);
+        })
+        .catch(error => {
+          console.error(error);
+        });
+    },
+    loadCurrencies() {
+      axios.get('https://api.coincap.io/v2/assets')
+        .then(response => {
+          this.currencies = response.data.data;
+        })
+        .catch(error => {
+          console.error(error);
+        });
     }
   },
   mounted() {

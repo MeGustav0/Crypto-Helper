@@ -15,7 +15,6 @@ export const useUserStore = defineStore('userStore', {
       this.viewTransactionForName = this.arrTransactions.filter(item => item.wallet === this.wallet);
       for (const existingTable of this.viewTransactionForName) {
         existingTable.currentPrice = await this.getCurrentPrice(existingTable.coinName);
-        existingTable.oneWeekAgoPrice = await this.getOneWeekAgoPrice(existingTable.coinName);
       }
 
       console.log(this.viewTransactionForName);
@@ -32,27 +31,6 @@ export const useUserStore = defineStore('userStore', {
         } else {
           return null;
         }
-      } catch (error) {
-        console.error(error);
-        return null;
-      }
-    },
-    
-    async getOneWeekAgoPrice(coinName) {
-      try {
-        const oneWeekAgoDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]; // Дата неделю назад в формате 'YYYY-MM-DD'
-    
-        // Получение цены валюты на дату неделю назад
-        const oneWeekAgoPriceResponse = await axios.get(`https://api.coincap.io/v2/assets/${coinName}/history`, {
-          params: {
-            interval: 'd1',
-            start: oneWeekAgoDate,
-            end: oneWeekAgoDate
-          }
-        });
-    
-        const oneWeekAgoPriceData = oneWeekAgoPriceResponse.data.data;
-        return oneWeekAgoPriceData.length > 0 ? oneWeekAgoPriceData[0].priceUsd : null;
       } catch (error) {
         console.error(error);
         return null;

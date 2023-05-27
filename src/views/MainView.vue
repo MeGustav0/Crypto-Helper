@@ -12,6 +12,7 @@
         <div class="flex">
           <button class=" fl-mid prof" @click="openMenuNotification">
             <img src="/img/icons/notification-copy-svgrepo-com.svg" style="width: 32px; height: 40px;" alt="">
+            <img src="/img/icons/circle-on-svgrepo-com.svg" alt="" style="position: absolute; margin-top: 1px;transform: translate3d(-11px, 0px, 0px);">
           </button>
           <div>
             <button class="prof" @click="openLang">
@@ -28,7 +29,6 @@
             </button>
             <div class="prof_menu flex" v-show="visibleProfMenu">
               <button class="dwn-itm flex" @click="showProfile = true">{{ $t('profile') }}</button>
-              <button class="dwn-itm flex" >FAQ</button>
               <button class="dwn-itm flex" style="border: 0" @click="openExitMenu = true">{{ $t('Exit') }}</button>
             </div>
           </div>
@@ -114,13 +114,30 @@
       </div>
     </div>
 
-
+    <div class="modal flex fl-mid" style="display: none;">
+        <div class="add-transaction flex" style="width: 700px;">
+          <div class="flex">
+            <label for="" style="font-size: 30px;margin-bottom: 25px;">Профиль</label>
+            <button class="flex fl-mid" style="width: 100;height: 30px; border:0; border-radius: 15px; background-color: #9598a378; padding: 10px; margin-left: 182px; font-size: 18px; color:#feffff">←назад</button>
+          </div>
+            <label for="">Имя пользователя</label>
+            <div class="inForm">Me_Gustav</div>
+            <label for="">Логин пользователя</label>
+            <div class="inForm">leha-bolshakov02@mail.ru</div>
+            <label for="">Пароль пользователя</label>
+            <div style="width: 400px;">
+              <input style="width: 380px;" class="inForm" type="password" id="password-input" name="password">
+              <img src="/img/icons/eye.svg" alt="" style="position: relative; transform: translate3d(+360px, -65px, 0px);">
+            </div>
+        </div>  
+    </div>
   </div>
 </template>
 
 <script>
 import {useUserStore} from '../store/index'
 import router from "@/router";
+import ProfileModal from '@/components/ProfileModal';
 import WalletModal from "@/components/WalletModal";
 import WalletMain from "@/components/WalletMain";
 // import axios from 'axios';
@@ -128,7 +145,8 @@ import WalletMain from "@/components/WalletMain";
 export default {
   components: {
     WalletMain,
-    WalletModal
+    WalletModal,
+    ProfileModal
   },
   data() {
     return {

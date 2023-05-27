@@ -1,5 +1,5 @@
 <template>
-  <div class="reg">
+  <div class="reg flex" style="flex-direction: column;">
     <div class="container">
       <div class="content">
         <div style="display: flex; align-items: center; margin-bottom: 30px">
@@ -7,7 +7,7 @@
             <svg width="80.000000pt" height="65.000000px" viewBox="0 0 158.000000 97.000000"
                  preserveAspectRatio="xMidYMid meet"  style="border-radius: 10px;">
               <g transform="translate(0.000000,97.000000) scale(0.100000,-0.100000)"
-                 fill="#F0C70B" stroke="none" >
+                 fill="#ef8307" stroke="none" >
                 <path d="M0 485 l0 -485 790 0 790 0 0 485 0 485 -790 0 -790 0 0 -485z m1195
                 265 c13 -77 81 -144 157 -156 l38 -7 0 -102 0 -102 -38 -7 c-76 -12 -144 -79
                 -157 -156 l-7 -40 -404 0 -404 0 0 25 c0 69 -68 146 -146 167 l-44 12 0 102 0
@@ -17,26 +17,30 @@
                 -2z"/></g>
             </svg>
           </div>
-          <div class="txt -ff" style="color: #F0C70B">Crypto-Helper</div>
+          <div class="txt " style="color: #ef8307">Crypto-Helper</div>
         </div>
-        <span class="-ff" style="font-size: 40px;display: flex;justify-content: center; margin-bottom: 20px">Registration</span>
+        <span class="-ff" style="font-size: 40px;display: flex;justify-content: center; margin-bottom: 20px">{{ $t('Registration') }}</span>
         <div>
-          <span class="h1 -ff">User Name</span>
+          <span class="h1 -ff">{{ $t('UserName') }}</span>
           <input type="text" id="username" v-model="username" class="inForm -ff" >
         </div>
         <div>
-          <span class="h1 -ff">Login</span>
+          <span class="h1 -ff">{{ $t('Login') }}</span>
           <input type="email" id="email" v-model="email" class="inForm -ff" >
         </div>
         <div>
-          <span class="h1 -ff">Password</span>
+          <span class="h1 -ff">{{ $t('Password') }}</span>
           <input type="password" id="password" v-model="password" class="inForm -ff" >
-          <p>{{ message }}</p>
+          <!-- <p>{{ message }}</p> -->
         </div>
         <div style="display:flex;margin-top:40px;flex-direction: column;align-items: center;">
-          <button class="btn" @click="$router.push('/')">Confirm</button>
+          <button class="btn" @click="$router.push('/')">{{ $t('Confirm') }}</button>
         </div>
       </div>
+    </div>
+    <div class="flex" >
+      <button @click="changeLanguage('ru')" class="dwn-itm flex" >RU</button>
+      <button @click="changeLanguage('en')" class="dwn-itm flex" >EN</button>
     </div>
   </div>
 </template>
@@ -54,6 +58,10 @@ export default {
     };
   },
   methods: {
+    changeLanguage(locale) {
+      this.$i18n.locale = locale;
+      localStorage.setItem('language', locale); // Сохранение выбранного языка в localStorage
+    },
     async registerUser() {
       try {
         const response = await fetch('http://localhost:3000/register', {
@@ -99,7 +107,11 @@ export default {
   background-color: #1e2c39;
   font-family: "Montserrat",Sans-serif,serif;
 }
-
+@media (max-width: 530px){
+  .txt{
+    font-size: 8.5vw!important;
+  }
+}
 .container{
   display: flex;
   width: 100%;
@@ -154,14 +166,14 @@ export default {
   padding-left: 30px;
   padding-right: 30px;
   color: #feffff;
-  background-color: #F0C70B;
+  background-color: #c0862f;
   border: 2px solid rgba(0, 0, 0, 0.11);
   border-radius:20px;
   transition:background-color 0.15s ease-in-out;
 }
 
 .btn:hover{
-  background-color: #fff200;
+  background-color: #ef8307;
   text-decoration: none;
   cursor: pointer;
 }

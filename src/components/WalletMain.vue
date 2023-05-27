@@ -10,7 +10,7 @@
       <div class="distribution">
         <h2 style="color: #feffff; padding: 10px">Распределение</h2>
         <div>
-          <Doughnut :data="chartData" :options="chartOptions" />
+          <Doughnut :data="chartData" :options="chartOptions"/>
         </div>
       </div>
     </div>
@@ -54,8 +54,8 @@
             <div>${{ existingTable.currentPrice }}</div>
           </td>
           <td class="fl-mid">
-            <div>
-<!--              {{existingTable.oneWeekAgoPrice}}-->
+            <div :class="{'positive': existingTable.oneWeekAgoPrice > 0, 'negative': existingTable.oneWeekAgoPrice < 0}">
+             {{existingTable.oneWeekAgoPrice}}%
             </div></td>
           <td>
             <div>${{ (existingTable.currentPrice * existingTable.coinAmount).toFixed(2) }}</div>
@@ -222,7 +222,7 @@ export default {
       transactionType: 'buy',
       transactionPrice: 0,
       coinAmount: '',
-      oneWeekAgoPrice: '',
+      oneWeekAgoPrice: 0,
       transactionDate: '',
       transactionNote: '',
       NameWallet: '',
@@ -333,20 +333,22 @@ export default {
         coinAmount = -coinAmount;
       }
       const currentPrice = await this.userStore.getCurrentPrice(coinName);
-      const oneWeekAgoPrice = await this.userStore.getOneWeekAgoPrice(coinName);
+      // const oneWeekAgoPrice = await this.userStore.getOneWeekAgoPrice(coinName);
       // Создание новой транзакции
+    
       const newTransaction = {
         coinName,
         transactionType,
         transactionPrice: Math.abs(transactionPrice),
         ChartPrice: transactionPrice,
         coinAmount,
-        oneWeekAgoPrice,
+        // oneWeekAgoPrice,
         price: currentPrice, // Используем полученную текущую цену
         transactionDate: this.transactionDate,
         transactionNote: this.transactionNote,
         wallet: this.wallet,
       };
+       this.getOneWeekAgoPrice(newTransaction);
       if (coinName in this.transactionsDetails) {
         this.transactionsDetails[coinName].push(newTransaction);
       } else {
@@ -373,11 +375,35 @@ export default {
         existingTable.transactionDate = this.transactionDate;
         existingTable.transactionNote = this.transactionNote;
       } else {
+        
         // Добавление новой таблицы
         this.userStore.arrTransactions.push(newTransaction);
       }
       console.log(this.userStore.arrTransactions);
       await this.userStore.filterTransactions()
+    },
+    async getOneWeekAgoPrice(arrTransactions) {
+      const endDate = new Date();
+      const startDate = new Date();
+      startDate.setDate(endDate.getDate() - 7);
+
+      axios.get(`https://api.coincap.io/v2/assets/${this.coinName}/history?interval=d1&start=${startDate.getTime()}&end=${endDate.getTime()}`)
+        .then(historyResponse => {
+          const historyData = historyResponse.data.data;
+
+          if (historyData.length >= 2) {
+            const startPrice = historyData[0].priceUsd;
+            const endPrice = historyData[historyData.length - 1].priceUsd;
+            const percentChange = ((endPrice - startPrice) / startPrice) * 100;
+            arrTransactions.oneWeekAgoPrice = percentChange.toFixed(2);
+          }
+
+          this.transactions.push(arrTransactions);
+          console.log(this.arrTransactions)
+        })
+        .catch(error => {
+          console.error(error);
+        });
     },
     removeTransaction(coinName, index) {
       const transaction = this.transactionsDetails[coinName][index];
@@ -473,11 +499,13 @@ export default {
 <style >
 .positive {
   color: #00ce00;
+  text-shadow: #00ce0094 1px 0 10px;
   font-weight: 600!important;
 }
 
 .negative {
   color: red;
+  text-shadow: rgba(255, 0, 0, 0.555) 1px 0 10px;
   font-weight: 600!important;
 }
 .table_main{
@@ -577,6 +605,19 @@ option{
     font-size: 1.8vw!important;
   }
 }
+@media (max-width: 700px) {
+  .graph {
+    flex-wrap: wrap;
+  }
+  .distribution{
+    width: 100%!important;
+  }
+  .chart-menu{
+    width: 100%!important;
+    margin: 0!important;
+  }
+}
+
 .table-coin{
   width: 90vw;
   /*min-width: 350px;*/
